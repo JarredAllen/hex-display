@@ -1,6 +1,6 @@
 [package]
 name = "hex-display"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Jarred Allen <jarredallen73@gmail.com>"]
 description = "Display impl for byte slices which provides a hexdump"
@@ -8,7 +8,7 @@ repository = "https://github.com/JarredAllen/hex-display"
 documentation = "https://docs.rs/crate/hex-display/latest"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-keywords = ["hex", "slice"]
-categories = ["no-std"]
+keywords = ["hex", "slice", "no-std"]
+categories = ["no-std", "rust-patterns"]
 
 [dependencies]
