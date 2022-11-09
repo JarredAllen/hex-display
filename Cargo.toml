@@ -12,3 +12,6 @@ keywords = ["hex", "slice", "no-std"]
 categories = ["no-std", "rust-patterns"]
 
 [dependencies]
+
+[features]
+std = []
