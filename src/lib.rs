@@ -1,7 +1,7 @@
 #![no_std]
 #![doc = include_str!("../README.md")]
 
-use core::fmt::Display;
+use core::fmt::{Display, Debug};
 
 #[cfg(feature = "std")]
 extern crate std;
@@ -62,7 +62,6 @@ impl<const N: usize> HexDisplayExt for [u8; N] {
 ///     "0123456789abcdef"
 /// );
 /// ```
-#[derive(Debug)]
 pub struct Hex<'a>(
     /// The bytes to be converted into a hexdump
     pub &'a [u8],
@@ -82,6 +81,14 @@ impl<'a> Hex<'a> {
     }
 }
 
+impl<'a> Debug for Hex<'a> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        for byte in self.0 {
+            f.write_fmt(format_args!("{:02x}", byte))?;
+        }
+        Ok(())
+    }
+}
 impl<'a> Display for Hex<'a> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         for byte in self.0 {
@@ -101,7 +108,6 @@ impl<'a> Display for Hex<'a> {
 ///     "0123456789ABCDEF"
 /// );
 /// ```
-#[derive(Debug)]
 pub struct UpperHex<'a>(
     /// The bytes to be converted into a hexdump
     pub &'a [u8],
@@ -121,6 +127,14 @@ impl<'a> UpperHex<'a> {
     }
 }
 
+impl<'a> Debug for UpperHex<'a> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        for byte in self.0 {
+            f.write_fmt(format_args!("{:02X}", byte))?;
+        }
+        Ok(())
+    }
+}
 impl<'a> Display for UpperHex<'a> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         for byte in self.0 {

@@ -1,6 +1,6 @@
 [package]
 name = "hex-display"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["Jarred Allen <jarredallen73@gmail.com>"]
 description = "Display impl for byte slices which provides a hexdump"
