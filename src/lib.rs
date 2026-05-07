@@ -84,7 +84,7 @@ pub struct Hex<'a>(
     pub &'a [u8],
 );
 
-impl<'a> UpperHex for Hex<'a> {
+impl UpperHex for Hex<'_> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         for byte in self.0 {
             f.write_fmt(format_args!("{:02X}", byte))?;
@@ -92,7 +92,7 @@ impl<'a> UpperHex for Hex<'a> {
         Ok(())
     }
 }
-impl<'a> LowerHex for Hex<'a> {
+impl LowerHex for Hex<'_> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         for byte in self.0 {
             f.write_fmt(format_args!("{:02x}", byte))?;
@@ -100,7 +100,7 @@ impl<'a> LowerHex for Hex<'a> {
         Ok(())
     }
 }
-impl<'a> Debug for Hex<'a> {
+impl Debug for Hex<'_> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         for byte in self.0 {
             f.write_fmt(format_args!("{:02x}", byte))?;
@@ -108,7 +108,7 @@ impl<'a> Debug for Hex<'a> {
         Ok(())
     }
 }
-impl<'a> Display for Hex<'a> {
+impl Display for Hex<'_> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         for byte in self.0 {
             f.write_fmt(format_args!("{:02x}", byte))?;
