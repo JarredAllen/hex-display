@@ -2,6 +2,7 @@
 name = "hex-display"
 version = "0.3.0"
 edition = "2021"
+rust-version = "1.56"
 authors = ["Jarred Allen <jarredallen73@gmail.com>"]
 description = "Display impl for byte slices which provides a hexdump"
 repository = "https://github.com/JarredAllen/hex-display"

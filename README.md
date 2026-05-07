@@ -22,3 +22,7 @@ assert_eq!(
     "0123456789abcdef"
 );
 ```
+
+## Minimum Supported Rust Version
+The MSRV is as defined in the `Cargo.toml` file. It may increase in minor versions, but will always
+remain at least a year ago.
