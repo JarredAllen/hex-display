@@ -3,8 +3,11 @@
 
 use core::fmt::{Debug, Display, LowerHex, UpperHex};
 
-#[cfg(feature = "std")]
+#[cfg(any(feature = "std", test))]
 extern crate std;
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
 
 /// An extension trait that allows for more easily constructing [`Hex`] values
 ///
@@ -25,19 +28,18 @@ pub trait HexDisplayExt {
 
     /// Convert to a upper-case hex string
     ///
-    /// Only present when built with `std` support.
-    #[cfg(feature = "std")]
-    fn upper_hex_string(&self) -> std::string::String {
-        use std::string::ToString;
-        format!("{:X}", self.hex())
+    /// Only present when built with `alloc` support.
+    #[cfg(feature = "alloc")]
+    fn upper_hex_string(&self) -> alloc::string::String {
+        alloc::format!("{:X}", self.hex())
     }
 
     /// Convert to a lower-case hex string
     ///
-    /// Only present when built with `std` support.
-    #[cfg(feature = "std")]
-    fn hex_string(&self) -> std::string::String {
-        use std::string::ToString;
+    /// Only present when built with `alloc` support.
+    #[cfg(feature = "alloc")]
+    fn hex_string(&self) -> alloc::string::String {
+        use alloc::string::ToString;
         self.hex().to_string()
     }
 }
@@ -117,8 +119,6 @@ impl<'a> Display for Hex<'a> {
 
 #[cfg(test)]
 mod tests {
-    extern crate std;
-
     use std::format;
 
     use super::*;

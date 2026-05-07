@@ -14,4 +14,5 @@ categories = ["no-std", "rust-patterns"]
 [dependencies]
 
 [features]
-std = []
+std = ["alloc"]
+alloc = []
