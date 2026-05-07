@@ -18,9 +18,17 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 
+[dev-dependencies]
+criterion = "0.5"
+
 [features]
 std = ["alloc"]
 alloc = []
+
+[[bench]]
+name = "format"
+harness = false
+required-features = ["alloc"]
 
 
 [lints.rust]
