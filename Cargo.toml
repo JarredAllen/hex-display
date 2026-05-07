@@ -12,6 +12,10 @@ license = "MIT OR Apache-2.0"
 keywords = ["hex", "slice", "no-std"]
 categories = ["no-std", "rust-patterns"]
 
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
 [dependencies]
 
 [features]
