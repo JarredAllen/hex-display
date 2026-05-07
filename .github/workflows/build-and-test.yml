@@ -1,0 +1,108 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+    checks: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rust-checks:
+    name: Repo Checks
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: stable
+        components: rustfmt
+        cache: false
+    - name: Check formatting
+      run: cargo fmt --all -- --check
+    - name: Run cargo-semver-checks
+      uses: obi1kenobi/cargo-semver-checks-action@v2
+
+  rust-matrix:
+    name: Build and Test (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Full test suite, all optional features on, latest and MSRV.
+          - name: stable / all-features
+            toolchain: stable
+            cargo-args: --all-features
+            target: ""
+            lib-only: false
+          - name: MSRV / all-features
+            toolchain: msrv
+            cargo-args: --all-features
+            target: ""
+            lib-only: false
+          # Only run alloc/core on latest versions, seems unlikely that we'd
+          # have a regression only with alloc/core and only on older Rust.
+          - name: stable / alloc-only
+            toolchain: stable
+            cargo-args: --features alloc
+            target: ""
+            lib-only: false
+          - name: stable / no_std (host)
+            toolchain: stable
+            cargo-args: ""
+            target: ""
+            lib-only: false
+          # no_std smoke test: build against a target without std so any
+          # accidental use of std fails to compile. lib-only because tests
+          # rely on alloc/std types.
+          - name: stable / no_std (thumbv7em-none-eabi)
+            toolchain: stable
+            cargo-args: ""
+            target: thumbv7em-none-eabi
+            lib-only: true
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Resolve toolchain version
+      id: toolchain
+      run: |
+        if [ "${{ matrix.toolchain }}" = "msrv" ]; then
+          version=$(awk -F'"' '/^rust-version[[:space:]]*=/ {print $2; exit}' Cargo.toml)
+          if [ -z "$version" ]; then
+            echo "::error::Could not find rust-version in Cargo.toml"
+            exit 1
+          fi
+        else
+          version="${{ matrix.toolchain }}"
+        fi
+        echo "Using toolchain: $version"
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+    - name: Install toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: ${{ steps.toolchain.outputs.version }}
+        components: clippy
+        target: ${{ matrix.target }}
+        cache: false
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v2.9.1
+      with:
+        key: ${{ matrix.name }}
+    - name: Run Clippy
+      uses: auguwu/clippy-action@1.5.0
+      with:
+        check-args: ${{ matrix.cargo-args }} ${{ matrix.target && format('--target {0}', matrix.target) || '' }} ${{ matrix.lib-only && '--lib' || '--all-targets' }}
+        args: -D warnings
+        token: ${{secrets.GITHUB_TOKEN}}
+    - name: Run tests
+      if: ${{ !matrix.lib-only }}
+      run: cargo test ${{ matrix.cargo-args }} --verbose
+    - name: Check docs
+      run: RUSTDOCFLAGS="-D warnings" cargo doc --no-deps ${{ matrix.cargo-args }} ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
