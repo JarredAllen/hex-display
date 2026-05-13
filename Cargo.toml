@@ -1,8 +1,8 @@
 [package]
 name = "hex-display"
-version = "0.3.2"
+version = "0.4.0"
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.74"
 authors = ["Jarred Allen <jarredallen73@gmail.com>"]
 description = "Display impl for byte slices which provides a hexdump"
 repository = "https://github.com/JarredAllen/hex-display"
