@@ -42,11 +42,16 @@ jobs:
             cargo-args: --all-features
             target: ""
             lib-only: false
+            skip-benches: false
+          # MSRV skips benches: criterion (our bench dev-dep) requires a
+          # newer toolchain than our published MSRV, and we don't support
+          # running benchmarks on the MSRV toolchain.
           - name: MSRV / all-features
             toolchain: msrv
             cargo-args: --all-features
             target: ""
             lib-only: false
+            skip-benches: true
           # Only run alloc/core on latest versions, seems unlikely that we'd
           # have a regression only with alloc/core and only on older Rust.
           - name: stable / alloc-only
@@ -54,11 +59,13 @@ jobs:
             cargo-args: --features alloc
             target: ""
             lib-only: false
+            skip-benches: false
           - name: stable / no_std (host)
             toolchain: stable
             cargo-args: ""
             target: ""
             lib-only: false
+            skip-benches: false
           # no_std smoke test: build against a target without std so any
           # accidental use of std fails to compile. lib-only because tests
           # rely on alloc/std types.
@@ -67,6 +74,7 @@ jobs:
             cargo-args: ""
             target: thumbv7em-none-eabi
             lib-only: true
+            skip-benches: false
 
     steps:
     - uses: actions/checkout@v4
@@ -98,7 +106,7 @@ jobs:
     - name: Run Clippy
       uses: auguwu/clippy-action@1.5.0
       with:
-        check-args: ${{ matrix.cargo-args }} ${{ matrix.target && format('--target {0}', matrix.target) || '' }} ${{ matrix.lib-only && '--lib' || '--all-targets' }}
+        check-args: ${{ matrix.cargo-args }} ${{ matrix.target && format('--target {0}', matrix.target) || '' }} ${{ matrix.lib-only && '--lib' || (matrix.skip-benches && '--lib --tests --examples' || '--all-targets') }}
         args: -D warnings
         token: ${{secrets.GITHUB_TOKEN}}
     - name: Run tests
