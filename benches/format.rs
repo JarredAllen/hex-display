@@ -10,7 +10,7 @@
 
 use core::fmt::Write as _;
 
-use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use hex_display::{Hex, HexDisplayExt};
 
 const SIZES: &[usize] = &[16, 256, 65_536];
