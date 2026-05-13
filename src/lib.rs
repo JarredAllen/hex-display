@@ -50,9 +50,9 @@ impl HexDisplayExt for [u8] {
     }
 }
 
-impl<const N: usize> HexDisplayExt for [u8; N] {
+impl<T: AsRef<[u8]>> HexDisplayExt for T {
     fn hex(&self) -> Hex<'_> {
-        Hex(self)
+        Hex(self.as_ref())
     }
 }
 
