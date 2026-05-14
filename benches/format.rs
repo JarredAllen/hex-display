@@ -86,7 +86,7 @@ fn bench_baseline_stdlib(c: &mut Criterion) {
             b.iter(|| {
                 sink.clear();
                 for byte in black_box(input) {
-                    write!(sink, "{:02x}", byte).unwrap();
+                    write!(sink, "{byte:02x}").unwrap();
                 }
                 black_box(&sink);
             });

@@ -358,37 +358,37 @@ mod tests {
     #[test]
     fn test_all_bytes() {
         for byte in 0..=0xff {
-            assert_eq!(format!("{:02x}", byte), format!("{}", Hex(&[byte])));
+            assert_eq!(format!("{byte:02x}"), format!("{}", Hex(&[byte])));
             #[cfg(feature = "alloc")]
-            assert_eq!(format!("{:02x}", byte), [byte].hex_string());
-            assert_eq!(format!("{:02x}", byte), format!("{:x}", Hex(&[byte])));
-            assert_eq!(format!("{:02X}", byte), format!("{:X}", Hex(&[byte])));
+            assert_eq!(format!("{byte:02x}"), [byte].hex_string());
+            assert_eq!(format!("{byte:02x}"), format!("{:x}", Hex(&[byte])));
+            assert_eq!(format!("{byte:02X}"), format!("{:X}", Hex(&[byte])));
             #[cfg(feature = "alloc")]
-            assert_eq!(format!("{:02X}", byte), [byte].upper_hex_string());
+            assert_eq!(format!("{byte:02X}"), [byte].upper_hex_string());
         }
     }
 
     #[test]
     fn test_all_byte_pairs() {
         for (a, b) in (0..=0xff).zip(0..=0xff) {
-            assert_eq!(format!("{:02x}{:02x}", a, b), format!("{}", Hex(&[a, b])));
-            assert_eq!(format!("{:02X}{:02X}", a, b), format!("{:X}", Hex(&[a, b])));
+            assert_eq!(format!("{a:02x}{b:02x}"), format!("{}", Hex(&[a, b])));
+            assert_eq!(format!("{a:02X}{b:02X}"), format!("{:X}", Hex(&[a, b])));
         }
     }
 
     #[test]
     fn test_width_padding() {
         let h = Hex(&[0x01, 0x23]);
-        assert_eq!(format!("{:>8}", h), "    0123");
-        assert_eq!(format!("{:<8}", h), "0123    ");
-        assert_eq!(format!("{:^8}", h), "  0123  ");
-        assert_eq!(format!("{:*>8}", h), "****0123");
+        assert_eq!(format!("{h:>8}"), "    0123");
+        assert_eq!(format!("{h:<8}"), "0123    ");
+        assert_eq!(format!("{h:^8}"), "  0123  ");
+        assert_eq!(format!("{h:*>8}"), "****0123");
         // Width <= content length is a no-op.
-        assert_eq!(format!("{:2}", h), "0123");
+        assert_eq!(format!("{h:2}"), "0123");
         // Default alignment is left, matching `Formatter::pad` for strings.
-        assert_eq!(format!("{:8}", h), "0123    ");
+        assert_eq!(format!("{h:8}"), "0123    ");
         // Padding applies to UpperHex as well.
-        assert_eq!(format!("{:>6X}", h), "  0123");
+        assert_eq!(format!("{h:>6X}"), "  0123");
     }
 
     #[test]
@@ -402,6 +402,10 @@ mod tests {
     #[test]
     fn test_alternate_multiline() {
         let mut bytes = [0u8; 18];
+        #[allow(
+            clippy::cast_possible_truncation,
+            reason = "`i` won't be large enough to truncate"
+        )]
         for (i, b) in bytes.iter_mut().enumerate() {
             *b = i as u8;
         }
