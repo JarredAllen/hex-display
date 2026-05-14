@@ -351,7 +351,7 @@ impl Display for Hex<'_> {
 
 #[cfg(test)]
 mod tests {
-    use std::format;
+    use alloc::format;
 
     use super::*;
 
@@ -402,10 +402,7 @@ mod tests {
     #[test]
     fn test_alternate_multiline() {
         let mut bytes = [0u8; 18];
-        #[allow(
-            clippy::cast_possible_truncation,
-            reason = "`i` won't be large enough to truncate"
-        )]
+        #[allow(clippy::cast_possible_truncation)] // i is small enoguh to not wrap
         for (i, b) in bytes.iter_mut().enumerate() {
             *b = i as u8;
         }

@@ -54,7 +54,6 @@ cargo = { level = "warn", priority = -1 }
 
 # Restriction lints
 unnecessary_self_imports = "warn"
-allow_attributes_without_reason = "warn"
 
 # no_std discipline
 std_instead_of_core = "warn"
