@@ -6,7 +6,7 @@ use core::fmt::{Debug, Display, LowerHex, UpperHex};
 #[cfg(any(feature = "std", test))]
 extern crate std;
 
-#[cfg(feature = "alloc")]
+#[cfg(any(feature = "alloc", test))]
 extern crate alloc;
 
 /// An extension trait that allows for more easily constructing [`Hex`] values
