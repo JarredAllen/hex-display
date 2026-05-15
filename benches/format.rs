@@ -34,7 +34,7 @@ fn bench_display(c: &mut Criterion) {
         group.bench_with_input(BenchmarkId::from_parameter(size), &input, |b, input| {
             b.iter(|| {
                 sink.clear();
-                write!(sink, "{}", Hex(black_box(input))).unwrap();
+                write!(sink, "{}", Hex::new(black_box(input))).unwrap();
                 black_box(&sink);
             });
         });
@@ -52,7 +52,7 @@ fn bench_upper_hex(c: &mut Criterion) {
         group.bench_with_input(BenchmarkId::from_parameter(size), &input, |b, input| {
             b.iter(|| {
                 sink.clear();
-                write!(sink, "{:X}", Hex(black_box(input))).unwrap();
+                write!(sink, "{:X}", Hex::new(black_box(input))).unwrap();
                 black_box(&sink);
             });
         });
@@ -67,7 +67,7 @@ fn bench_hex_string(c: &mut Criterion) {
         let input = make_input(size);
         group.throughput(Throughput::Bytes(size as u64));
         group.bench_with_input(BenchmarkId::from_parameter(size), &input, |b, input| {
-            b.iter(|| black_box(black_box(input.as_slice()).hex_string()));
+            b.iter(|| black_box(black_box(input.as_slice()).to_hex_string()));
         });
     }
     group.finish();

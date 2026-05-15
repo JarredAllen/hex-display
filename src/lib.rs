@@ -43,13 +43,15 @@ extern crate alloc;
 /// See the documentation for [`Hex`] for more details.
 pub trait HexDisplayExt {
     /// Display as a hexdump
+    #[must_use]
     fn hex(&self) -> Hex<'_>;
 
     /// Convert to a upper-case hex string
     ///
     /// Only present when built with `alloc` support.
     #[cfg(feature = "alloc")]
-    fn upper_hex_string(&self) -> alloc::string::String {
+    #[must_use]
+    fn to_upper_hex_string(&self) -> alloc::string::String {
         alloc::format!("{:X}", self.hex())
     }
 
@@ -57,7 +59,8 @@ pub trait HexDisplayExt {
     ///
     /// Only present when built with `alloc` support.
     #[cfg(feature = "alloc")]
-    fn hex_string(&self) -> alloc::string::String {
+    #[must_use]
+    fn to_hex_string(&self) -> alloc::string::String {
         use alloc::string::ToString;
         self.hex().to_string()
     }
@@ -66,7 +69,8 @@ pub trait HexDisplayExt {
     ///
     /// Only present when built with `alloc` support.
     #[cfg(feature = "alloc")]
-    fn upper_hexdump(&self) -> alloc::string::String {
+    #[must_use]
+    fn to_upper_hex_dump(&self) -> alloc::string::String {
         alloc::format!("{:#X}", self.hex())
     }
 
@@ -74,18 +78,13 @@ pub trait HexDisplayExt {
     ///
     /// Only present when built with `alloc` support.
     #[cfg(feature = "alloc")]
-    fn hexdump(&self) -> alloc::string::String {
+    #[must_use]
+    fn to_hex_dump(&self) -> alloc::string::String {
         alloc::format!("{:#x}", self.hex())
     }
 }
 
-impl HexDisplayExt for [u8] {
-    fn hex(&self) -> Hex<'_> {
-        Hex(self)
-    }
-}
-
-impl<T: AsRef<[u8]>> HexDisplayExt for T {
+impl<T: AsRef<[u8]> + ?Sized> HexDisplayExt for T {
     fn hex(&self) -> Hex<'_> {
         Hex(self.as_ref())
     }
@@ -102,15 +101,15 @@ impl<T: AsRef<[u8]>> HexDisplayExt for T {
 /// use hex_display::Hex;
 ///
 /// assert_eq!(
-///     format!("{}", Hex(&[0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef])),
+///     format!("{}", Hex::new(&[0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef])),
 ///     "0123456789abcdef"
 /// );
 /// assert_eq!(
-///     format!("{:?}", Hex(&[0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef])),
-///     "0123456789abcdef"
+///     format!("{:?}", Hex::new(&[0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef])),
+///     "Hex(0123456789abcdef)"
 /// );
 /// assert_eq!(
-///     format!("{:X}", Hex(&[0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef])),
+///     format!("{:X}", Hex::new(&[0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef])),
 ///     "0123456789ABCDEF"
 /// );
 /// ```
@@ -120,7 +119,7 @@ impl<T: AsRef<[u8]>> HexDisplayExt for T {
 ///
 /// ```
 /// use hex_display::Hex;
-/// assert_eq!(format!("{:>8}", Hex(&[0x01, 0x23])), "    0123");
+/// assert_eq!(format!("{:>8}", Hex::new(&[0x01, 0x23])), "    0123");
 /// ```
 ///
 /// Passing the alternate form (`#`) switches the output to a multiline
@@ -136,7 +135,7 @@ impl<T: AsRef<[u8]>> HexDisplayExt for T {
 ///     0x10, 0x11,
 /// ];
 /// assert_eq!(
-///     format!("{:#}", Hex(&bytes)),
+///     format!("{:#}", Hex::new(&bytes)),
 ///     "\
 /// 00000000  00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f  |................|
 /// 00000010  10 11                                             |..|",
@@ -145,10 +144,28 @@ impl<T: AsRef<[u8]>> HexDisplayExt for T {
 ///
 /// The alternate form combines with the upper-case flag (`{:#X}`) and with
 /// width-padding (`{:>WIDTH$#}`) just like the single-line form.
+///
+/// If the hex dump length exceeds the width in the output format (longer
+/// than 4 GiB), then the leading digit is replaced with a `*`:
+/// ```text
+/// ...
+/// fffffff0  00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f  |................|
+/// *0000000  00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f  |................|
+/// *0000010  00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f  |................|
+/// ```
+#[derive(Clone, Copy)]
 pub struct Hex<'a>(
-    /// The bytes to be converted into a hexdump
-    pub &'a [u8],
+    /// The bytes to be converted into a hexdump.
+    &'a [u8],
 );
+
+impl<'a> Hex<'a> {
+    /// Create a new [`Hex`] instance for the given bytes.
+    #[must_use]
+    pub fn new(s: &'a (impl AsRef<[u8]> + ?Sized)) -> Self {
+        Self(s.as_ref())
+    }
+}
 
 /// Lookup table indexed by nibble for lowercase hex output.
 const LOWER_HEX: &[u8; 16] = b"0123456789abcdef";
@@ -188,13 +205,21 @@ fn write_hex(
 
 /// Bytes per line in the multiline hexdump output.
 const HEXDUMP_LINE_BYTES: usize = 16;
+
+/// The width of the address in hexdump output.
+const HEXDUMP_ADDRESS_WIDTH: usize = 8;
+
+const HEXDUMP_ADDRESS_OVERFLOW_LINE_NUM: usize =
+    1 << (HEXDUMP_ADDRESS_WIDTH * 4 - HEXDUMP_LINE_BYTES.ilog2() as usize);
+
 /// Width of the hex region in a hexdump line: two 8-byte groups (each
 /// `"xx "` × 8 = 24 chars) separated by an extra space.
 const HEXDUMP_HEX_REGION: usize = 8 * 3 * 2;
 /// Width of a full hexdump line (16 bytes), excluding any trailing newlines.
 ///
 /// Layout: `ADDRESS_␠␠<hex region>␠␠|<ascii 16>|`.
-const HEXDUMP_FULL_LINE: usize = 8 + 2 + HEXDUMP_HEX_REGION + 2 + 1 + HEXDUMP_LINE_BYTES + 1;
+const HEXDUMP_FULL_LINE: usize =
+    HEXDUMP_ADDRESS_WIDTH + 2 + HEXDUMP_HEX_REGION + 2 + 1 + HEXDUMP_LINE_BYTES + 1;
 
 /// Compute the exact length, in bytes, of the alternate-form hexdump output
 /// for a slice of `byte_count` bytes (no trailing newline).
@@ -234,10 +259,16 @@ fn write_hexdump(
 
         let offset = line_idx * HEXDUMP_LINE_BYTES;
         let offset_buf = &mut buf[buf_idx..][..8];
-        for i in 0..8 {
-            offset_buf[7 - i] = table[(offset >> (i * 4)) & 0xf];
+        for i in 0..HEXDUMP_ADDRESS_WIDTH {
+            offset_buf[HEXDUMP_ADDRESS_WIDTH - i - 1] = table[(offset >> (i * 4)) & 0xf];
         }
-        buf_idx += 8 + 2; // add 2 blank spaces after above
+        if line_idx >= HEXDUMP_ADDRESS_OVERFLOW_LINE_NUM {
+            // If the offset overflows the space, mark the most significant nibble with '*' to
+            // indicate that the count has wrapped and is not accurate. This isn't a standard
+            // anywhere else, but it should be clear enough to end-users.
+            offset_buf[0] = b'*';
+        }
+        buf_idx += HEXDUMP_ADDRESS_WIDTH + 2; // add 2 blank spaces after above
 
         let hex_buf = &mut buf[buf_idx..][..HEXDUMP_HEX_REGION];
         for (i, &byte) in chunk.iter().enumerate() {
@@ -337,7 +368,9 @@ impl LowerHex for Hex<'_> {
 }
 impl Debug for Hex<'_> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        fmt_hex_with_options(f, self.0, LOWER_HEX)
+        f.debug_tuple("Hex")
+            .field(&format_args!("{self:x}"))
+            .finish()
     }
 }
 impl Display for Hex<'_> {
@@ -357,11 +390,11 @@ mod tests {
         for byte in 0..=0xff {
             assert_eq!(format!("{byte:02x}"), format!("{}", Hex(&[byte])));
             #[cfg(feature = "alloc")]
-            assert_eq!(format!("{byte:02x}"), [byte].hex_string());
+            assert_eq!(format!("{byte:02x}"), [byte].to_hex_string());
             assert_eq!(format!("{byte:02x}"), format!("{:x}", Hex(&[byte])));
             assert_eq!(format!("{byte:02X}"), format!("{:X}", Hex(&[byte])));
             #[cfg(feature = "alloc")]
-            assert_eq!(format!("{byte:02X}"), [byte].upper_hex_string());
+            assert_eq!(format!("{byte:02X}"), [byte].to_upper_hex_string());
         }
     }
 
@@ -393,7 +426,6 @@ mod tests {
         let bytes: [u8; 4] = [b'a', b'b', 0x00, 0xff];
         let expected = "00000000  61 62 00 ff                                       |ab..|";
         assert_eq!(format!("{:#}", Hex(&bytes)), expected);
-        assert_eq!(format!("{:#?}", Hex(&bytes)), expected);
     }
 
     #[test]
@@ -408,7 +440,7 @@ mod tests {
 00000010  10 11                                             |..|";
         assert_eq!(format!("{:#}", Hex(&bytes)), expected);
         #[cfg(feature = "alloc")]
-        assert_eq!(bytes.hexdump(), expected);
+        assert_eq!(bytes.to_hex_dump(), expected);
     }
 
     #[test]
@@ -417,7 +449,7 @@ mod tests {
         let expected = "00000000  48 65 6C 6C 6F 21 00 7F                           |Hello!..|";
         assert_eq!(format!("{:#X}", bytes.hex()), expected);
         #[cfg(feature = "alloc")]
-        assert_eq!(bytes.upper_hexdump(), expected);
+        assert_eq!(bytes.to_upper_hex_dump(), expected);
     }
 
     #[test]
