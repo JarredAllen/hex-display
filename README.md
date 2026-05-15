@@ -5,7 +5,7 @@ hex-display
 An implementation of Display on a wrapper for `&[u8]` which provides a hexdump (see [`Hex`] and
 [`HexDisplayExt`]). This crate also works in `no_std` environments.
 
-If `std` is present, it can also convert to a hexdump as a string.
+If `alloc` is present, it can also convert to a hexdump as a string.
 
 ## Example usage
 

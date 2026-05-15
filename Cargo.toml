@@ -22,7 +22,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 criterion = "0.5"
 
 [features]
-std = ["alloc"]
 alloc = []
 
 [[bench]]

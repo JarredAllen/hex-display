@@ -3,9 +3,6 @@
 
 use core::fmt::{Debug, Display, LowerHex, UpperHex};
 
-#[cfg(any(feature = "std", test))]
-extern crate std;
-
 #[cfg(any(feature = "alloc", test))]
 extern crate alloc;
 
