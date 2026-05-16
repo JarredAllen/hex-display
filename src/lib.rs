@@ -41,7 +41,11 @@ extern crate alloc;
 /// ```
 ///
 /// See the documentation for [`Hex`] for more details.
-pub trait HexDisplayExt {
+///
+/// This trait is sealed: downstream crates cannot implement it, since the
+/// blanket impl for `T: AsRef<[u8]> + ?Sized` already covers every
+/// reasonable input.
+pub trait HexDisplayExt: sealed::HexSealed {
     /// Display as a hexdump
     #[must_use]
     fn hex(&self) -> Hex<'_>;
@@ -88,6 +92,11 @@ impl<T: AsRef<[u8]> + ?Sized> HexDisplayExt for T {
     fn hex(&self) -> Hex<'_> {
         Hex(self.as_ref())
     }
+}
+
+mod sealed {
+    pub trait HexSealed {}
+    impl<T: AsRef<[u8]> + ?Sized> HexSealed for T {}
 }
 
 /// A wrapper type for `&[u8]` which implements Display by providing a hexdump
