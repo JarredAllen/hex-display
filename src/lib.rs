@@ -95,6 +95,8 @@ impl<T: AsRef<[u8]> + ?Sized> HexDisplayExt for T {
 }
 
 mod sealed {
+    /// Seal [`super::HexDisplayExt`] to prevent downstream implementations.
+    #[allow(clippy::module_name_repetitions)]
     pub trait HexSealed {}
     impl<T: AsRef<[u8]> + ?Sized> HexSealed for T {}
 }
