@@ -209,6 +209,10 @@ const HEXDUMP_LINE_BYTES: usize = 16;
 /// The width of the address in hexdump output.
 const HEXDUMP_ADDRESS_WIDTH: usize = 8;
 
+/// The number of lines of hexdump output before we overflow the address.
+///
+/// We can't just do `(1 << (HEXDUMP_ADDRESS_WIDTH * 4)) / HEXDUMP_LINE_BYTES` because that would
+/// overflow on 32-bit machines.
 const HEXDUMP_ADDRESS_OVERFLOW_LINE_NUM: usize =
     1 << (HEXDUMP_ADDRESS_WIDTH * 4 - HEXDUMP_LINE_BYTES.ilog2() as usize);
 
